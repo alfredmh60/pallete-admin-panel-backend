@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-// import { Admin } from '../entities/admin.entity';
-// import { Role } from '../entities/role.entity';
-// import { Permission } from '../entities/permission.entity';
-// import { RolePermission } from '../entities/role-permission.entity';
+ import { Admins } from '../entities/admin.entity';
+ import { Role } from '../entities/role.entity';
+ import { Permission } from '../entities/permission.entity';
+ import { RolePermission } from '../entities/role-permission.entity';
 // import { Log } from '../entities/log.entity';
 // import { DiscountPackage } from '../entities/discount-package.entity';
 // import { TicketDepartment } from '../entities/ticket-department.entity';
@@ -24,13 +24,13 @@ import { ConfigService } from '@nestjs/config';
         host: configService.get('DB_HOST', 'localhost'),
         port: configService.get('DB_PORT', 5432),
         username: configService.get('DB_USERNAME', 'postgres'),
-        password: configService.get('DB_PASSWORD', 'postgres'),
-        database: configService.get('DB_DATABASE', 'admin_panel'),
+        password: configService.get('DB_PASSWORD', '123456789'),
+        database: configService.get('DB_DATABASE', 'pallet-admin-panel-DB'),
         entities: [
-          // Admin,
-          // Role,
-          // Permission,
-          // RolePermission,
+           Admins,
+           Role,
+           Permission,
+           RolePermission,
           // Log,
           // DiscountPackage,
           // TicketDepartment,

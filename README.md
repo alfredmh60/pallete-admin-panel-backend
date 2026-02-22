@@ -96,3 +96,20 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+
+
+
+
+
+reset database in dev
+
+npx typeorm schema:drop -d src/database/data-source.ts
+npm run migration:run
+npm run seed
+npm run start:dev
+
+
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"manager@example.com","password":"Manager@123456"}'

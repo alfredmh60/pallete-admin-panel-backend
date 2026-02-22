@@ -6,10 +6,10 @@ import * as path from 'path';
 config();
 
 // ایمپورت Entityها
-// import { Admin } from '../entities/admin.entity';
-// import { Role } from '../entities/role.entity';
-// import { Permission } from '../entities/permission.entity';
-// import { RolePermission } from '../entities/role-permission.entity';
+ import { Admins } from '../entities/admin.entity';
+ import { Role } from '../entities/role.entity';
+ import { Permission } from '../entities/permission.entity';
+ import { RolePermission } from '../entities/role-permission.entity';
 // import { Log } from '../entities/log.entity';
 // import { DiscountPackage } from '../entities/discount-package.entity';
 // import { TicketDepartment } from '../entities/ticket-department.entity';
@@ -30,10 +30,10 @@ export const dataSourceOptions: DataSourceOptions = {
   
   // Entityها
   entities: [
-    // Admin,
-    // Role,
-    // Permission,
-    // RolePermission,
+     Admins,
+     Role,
+     Permission,
+     RolePermission,
     // Log,
     // DiscountPackage,
     // TicketDepartment,
