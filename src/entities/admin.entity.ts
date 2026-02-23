@@ -34,9 +34,7 @@ export class Admins {
   @Column({ name: 'role_id', nullable: true })
   roleId: number;
 
-  @ManyToOne(() => Role, (role) => role.admins)
-  @JoinColumn({ name: 'role_id' })
-  role: Role;
+
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
@@ -62,6 +60,15 @@ export class Admins {
 
   @Column({ name: 'deleted_at', nullable: true, type: 'timestamp' })
   deletedAt: Date;
+
+
+
+  @ManyToOne(() => Role, (role) => role.admins, { 
+    nullable: true,
+    eager: false // این مهمه
+  })
+  @JoinColumn({ name: 'role_id' }) // این خط حتماً باید باشه
+  role: Role;
 
   // Relations
   // @OneToMany(() => Log, (log) => log.admin)

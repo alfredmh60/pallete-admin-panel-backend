@@ -16,6 +16,7 @@ import { PermissionsModule } from './permissions/permissions.module';
 // import { LogsModule } from './logs/logs.module';
 import { EmailModule } from './email/email.module';
 
+
 @Module({
   imports: [
     // پیکربندی سراسری محیط
@@ -29,11 +30,12 @@ import { EmailModule } from './email/email.module';
 
     // ماژول‌های کاربردی
     EmailModule,      // سرویس ایمیل (Global)
-    AuthModule,       // احراز هویت
+    
     AdminsModule,     // مدیریت ادمین‌ها
     RolesModule,      // مدیریت نقش‌ها
     PermissionsModule, // مدیریت مجوزها
-    // DiscountsModule,  // مدیریت تخفیف‌ها
+   AuthModule,       // احراز هویت 
+   // // DiscountsModule,  // مدیریت تخفیف‌ها
     // TicketsModule,    // مدیریت تیکت‌ها
     // FinanceModule,    // مدیریت مالی
     // AdminTicketsModule, // تیکت‌های مدیریتی

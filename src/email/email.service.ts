@@ -40,7 +40,7 @@ export class EmailService {
       if (error) {
         this.logger.error('خطا در اتصال به سرور ایمیل:', error);
       } else {
-        this.logger.log('اتصال به سرور ایمیل با موفقیت برقرار شد');
+        this.logger.log('Application in conneced to Email service');
       }
     });
   }

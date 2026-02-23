@@ -25,7 +25,7 @@ import { ConfigService } from '@nestjs/config';
         port: configService.get('DB_PORT', 5432),
         username: configService.get('DB_USERNAME', 'postgres'),
         password: configService.get('DB_PASSWORD', '123456789'),
-        database: configService.get('DB_DATABASE', 'pallet-admin-panel-DB'),
+        database: configService.get('DB_DATABASE', 'palette_ap_db'),
         entities: [
            Admins,
            Role,

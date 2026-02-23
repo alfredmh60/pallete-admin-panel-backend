@@ -5,52 +5,66 @@ import { Role } from '../../entities/role.entity';
 import { Permission } from '../../entities/permission.entity';
 import { RolePermission } from '../../entities/role-permission.entity';
 
+import moment from 'moment-timezone';
+
+
 export class InitialSeed {
+  private defaultTimezone = 'Asia/Tehran';
+  
+   private getCurrentTimestamp(timezone?: string): string {
+    return moment()
+      .tz(timezone || this.defaultTimezone)
+      .format('YYYY-MM-DD HH:mm:ss');
+  }
+
   async run(dataSource: DataSource): Promise<void> {
+    const MANAGER_ID=0;
+const NOW =this.getCurrentTimestamp();
+
     const queryRunner = dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      console.log('🌱 شروع seeding...');
+      console.log('🌱 start seeding..');
 
       // ========== 1. ایجاد مجوزها ==========
-      console.log('ایجاد مجوزها...');
+      console.log('create permissions...');
       const permissionRepository = queryRunner.manager.getRepository(Permission);
       
       const permissionsData = [
         // مدیریت ادمین‌ها
-        { name: 'view_admins', description: 'مشاهده لیست ادمین‌ها', category: 'admins' },
-        { name: 'create_admin', description: 'ایجاد ادمین جدید', category: 'admins' },
-        { name: 'edit_admin', description: 'ویرایش ادمین', category: 'admins' },
-        { name: 'toggle_admin', description: 'فعال/غیرفعال کردن ادمین', category: 'admins' },
-        { name: 'delete_admin', description: 'حذف ادمین', category: 'admins' },
+        { name: 'view_admins', description: 'مشاهده لیست ادمین‌ها', category: 'admins' ,createdAt:NOW},
+        { name: 'create_admin', description: 'ایجاد ادمین جدید', category: 'admins' ,createdAt:NOW},
+        { name: 'edit_admin', description: 'ویرایش ادمین', category: 'admins' ,createdAt:NOW},
+        { name: 'toggle_admin', description: 'فعال/غیرفعال کردن ادمین', category: 'admins' ,createdAt:NOW},
+        { name: 'delete_admin', description: 'حذف ادمین', category: 'admins' ,createdAt:NOW},
         
         // مدیریت نقش‌ها
-        { name: 'manage_roles', description: 'مدیریت نقش‌ها و مجوزها', category: 'roles' },
+        { name: 'manage_roles', description: 'مدیریت نقش‌ها و مجوزها', category: 'roles',createdAt:NOW },
         
         // مدیریت تخفیف‌ها
-        { name: 'view_discounts', description: 'مشاهده تخفیف‌ها', category: 'discounts' },
-        { name: 'manage_discounts', description: 'مدیریت تخفیف‌ها', category: 'discounts' },
+        { name: 'view_discounts', description: 'مشاهده تخفیف‌ها', category: 'discounts' ,createdAt:NOW},
+        { name: 'manage_discounts', description: 'مدیریت تخفیف‌ها', category: 'discounts' ,createdAt:NOW},
         
         // مدیریت تیکت‌ها
-        { name: 'view_tickets', description: 'مشاهده تیکت‌ها', category: 'tickets' },
-        { name: 'reply_ticket', description: 'پاسخ به تیکت', category: 'tickets' },
-        { name: 'close_ticket', description: 'بستن تیکت', category: 'tickets' },
-        { name: 'assign_ticket', description: 'تخصیص تیکت', category: 'tickets' },
+        { name: 'view_tickets', description: 'مشاهده تیکت‌ها', category: 'tickets' ,createdAt:NOW},
+        { name: 'reply_ticket', description: 'پاسخ به تیکت', category: 'tickets' ,createdAt:NOW},
+        { name: 'close_ticket', description: 'بستن تیکت', category: 'tickets' ,createdAt:NOW},
+        { name: 'assign_ticket', description: 'تخصیص تیکت', category: 'tickets' ,createdAt:NOW},
         
         // مدیریت مالی
-        { name: 'view_finance', description: 'مشاهده امور مالی', category: 'finance' },
-        { name: 'manage_finance', description: 'مدیریت امور مالی', category: 'finance' },
+        { name: 'view_finance', description: 'مشاهده امور مالی', category: 'finance' ,createdAt:NOW},
+        { name: 'manage_finance', description: 'مدیریت امور مالی', category: 'finance' ,createdAt:NOW},
         
         // تیکت‌های مدیریتی
-        { name: 'view_admin_tickets', description: 'مشاهده تیکت‌های مدیریتی', category: 'adminTickets' },
-        { name: 'send_admin_ticket', description: 'ارسال تیکت مدیریتی', category: 'adminTickets' },
-        { name: 'close_admin_ticket', description: 'بستن تیکت مدیریتی', category: 'adminTickets' },
+        { name: 'view_admin_tickets', description: 'مشاهده تیکت‌های مدیریتی', category: 'adminTickets' ,createdAt:NOW},
+        { name: 'send_admin_ticket', description: 'ارسال تیکت مدیریتی', category: 'adminTickets' ,createdAt:NOW},
+        { name: 'close_admin_ticket', description: 'بستن تیکت مدیریتی', category: 'adminTickets' ,createdAt:NOW},
         
         // لاگ‌ها
-        { name: 'view_logs', description: 'مشاهده لاگ‌ها', category: 'logs' },
-        { name: 'delete_logs', description: 'حذف لاگ‌ها', category: 'logs' },
+        { name: 'view_logs', description: 'مشاهده لاگ‌ها', category: 'logs' ,createdAt:NOW},
+        { name: 'delete_logs', description: 'حذف لاگ‌ها', category: 'logs' ,createdAt:NOW},
       ];
 
       // روش صحیح: create با آرایه
@@ -59,23 +73,24 @@ export class InitialSeed {
       console.log(`${savedPermissions.length} مجوز ایجاد شد`);
 
       // ========== 2. ایجاد نقش‌ها ==========
-      console.log('ایجاد نقش‌ها...');
+      console.log('create roles...');
       const roleRepository = queryRunner.manager.getRepository(Role);
 
+
       const rolesData = [
-        { name: 'manager', description: 'مدیر کل - دسترسی کامل به همه بخش‌ها', createdBy: undefined },
-        { name: 'super_admin', description: 'مدیر ارشد - دسترسی مدیریت ادمین‌ها', createdBy: undefined },
-        { name: 'admin_finance', description: 'ادمین امور مالی', createdBy: undefined },
-        { name: 'admin_support', description: 'ادمین پشتیبانی', createdBy: undefined },
+        { name: 'manager', description: 'مدیر کل - دسترسی کامل به همه بخش‌ها', createdBy: MANAGER_ID ,createdAt:NOW,updatedAt:NOW},
+        { name: 'super_admin', description: 'مدیر ارشد - دسترسی مدیریت ادمین‌ها', createdBy: MANAGER_ID ,createdAt:NOW,updatedAt:NOW},
+        { name: 'admin_finance', description: 'ادمین امور مالی', createdBy: MANAGER_ID ,createdAt:NOW,updatedAt:NOW},
+        { name: 'admin_support', description: 'ادمین پشتیبانی', createdBy: MANAGER_ID ,createdAt:NOW,updatedAt:NOW},
       ];
 
       // روش صحیح: create با آرایه
       const roles = roleRepository.create(rolesData);
       const savedRoles = await roleRepository.save(roles);
-      console.log(`${savedRoles.length} نقش ایجاد شد`);
+      console.log(`${savedRoles.length} role is created`);
 
       // ========== 3. تخصیص مجوزها به نقش‌ها ==========
-      console.log('تخصیص مجوزها به نقش‌ها...');
+      console.log('assign permission to roles');
       const rolePermissionRepository = queryRunner.manager.getRepository(RolePermission);
 
       const rolePermissionsData: Partial<RolePermission>[] = [];
@@ -142,10 +157,13 @@ export class InitialSeed {
       const passwordHash = await bcrypt.hash(plainPassword, 10);
 
       const adminData = {
+        id:MANAGER_ID,
         email: 'manager@example.com',
         passwordHash,
         name: 'مدیر سیستم',
         roleId: savedRoles[0].id, // manager
+        createdAt:NOW,
+        updatedAt:NOW,
         isActive: true,
         createdBy: undefined,
       };

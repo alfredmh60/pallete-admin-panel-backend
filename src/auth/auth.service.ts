@@ -13,6 +13,7 @@ import { LoginDto } from './dto/login.dto';
 import { RequestResetDto } from './dto/request-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -27,12 +28,13 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
-
+  
     // پیدا کردن کاربر با ایمیل
-    const admin = await this.adminRepository.findOne({
-      where: { email },
-      relations: ['role', 'role.rolePermissions', 'role.rolePermissions.permission'],
-    });
+    // const admin = await this.adminRepository.findOne({
+    //   where: { email },
+    //   relations: ['role', 'role.rolePermissions', 'role.rolePermissions.permission'],
+    // });
+const admin = await this.adminRepository.findOneBy({ email });
 
     // بررسی وجود کاربر و صحت رمز
     if (!admin || !admin.isActive) {
@@ -161,7 +163,7 @@ export class AuthService {
   async validateUser(payload: JwtPayload): Promise<Admins> {
     const admin = await this.adminRepository.findOne({
       where: { id: payload.sub, isActive: true },
-      relations: ['role'],
+       relations: ['role'],
     });
 
     if (!admin) {
