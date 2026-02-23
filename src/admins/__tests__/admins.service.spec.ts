@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { AdminsService } from '../admins.service';
-import { Admins } from '../../entities/admin.entity';
+import { Admins } from '../../entities/admins.entity';
 // import { Role } from '../../entities/role.entity';
 // import { AdminDepartment } from '../../entities/admin-department.entity';
 // import { EmailService } from '../../email/email.service';

@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "admin-panel-backend",
   "version": "1.0.0",
   "description": "Admin Panel Backend with NestJS and TypeORM",
   "author": "Palette Tech",

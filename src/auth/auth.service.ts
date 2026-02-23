@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 
-import { Admins } from '../entities/admin.entity';
+import { Admins } from '../entities/admins.entity';
 import { Role } from '../entities/role.entity';
 import { EmailService } from '../email/email.service';
 
@@ -29,7 +29,7 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
   
-    // پیدا کردن کاربر با ایمیل
+   // پیدا کردن کاربر با ایمیل
     // const admin = await this.adminRepository.findOne({
     //   where: { email },
     //   relations: ['role', 'role.rolePermissions', 'role.rolePermissions.permission'],

@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminsController } from './admins.controller';
 import { AdminsService } from './admins.service';
 
-import { Admins } from '../entities/admin.entity';
+import { Admins } from '../entities/admins.entity';
 import { Role } from '../entities/role.entity';
 
 @Module({

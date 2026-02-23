@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Admins } from './admin.entity';
+import { Admins } from './admins.entity';
 import { RolePermission } from './role-permission.entity';
 
 @Entity('roles')
@@ -30,13 +30,9 @@ export class Role {
   updatedAt: Date;
 
   // Relations
-  @OneToMany(() => Admins, (admins) => admins.roleId)
+  @OneToMany(() => Admins, (admin) => admin.role)
   admins: Admins[];
 
-  @OneToMany(() => RolePermission, (rolePermission) => rolePermission.roleId)
+  @OneToMany(() => RolePermission, (rolePermission) => rolePermission.role)
   rolePermissions: RolePermission[];
 }
-
-
-
-

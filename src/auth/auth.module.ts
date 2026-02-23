@@ -8,7 +8,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
-import { Admins } from '../entities/admin.entity';
+import { Admins } from '../entities/admins.entity';
 import { Role } from '../entities/role.entity';
 
 @Module({

@@ -8,7 +8,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
- import { Role } from './role.entity';
+import { Role } from './role.entity';
 // import { Log } from './log.entity';
 // import { TicketAssignment } from './ticket-assignment.entity';
 // import { AdminDepartment } from './admin-department.entity';
@@ -34,7 +34,9 @@ export class Admins {
   @Column({ name: 'role_id', nullable: true })
   roleId: number;
 
-
+  @ManyToOne(() => Role, (role) => role.admins)
+  @JoinColumn({ name: 'role_id' })
+  role: Role;
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
@@ -61,28 +63,19 @@ export class Admins {
   @Column({ name: 'deleted_at', nullable: true, type: 'timestamp' })
   deletedAt: Date;
 
-
-
-  @ManyToOne(() => Role, (role) => role.admins, { 
-    nullable: true,
-    eager: false // این مهمه
-  })
-  @JoinColumn({ name: 'role_id' }) // این خط حتماً باید باشه
-  role: Role;
-
   // Relations
   // @OneToMany(() => Log, (log) => log.admin)
   // logs: Log[];
 
-//   @OneToMany(() => TicketAssignment, (assignment) => assignment.admin)
-//   ticketAssignments: TicketAssignment[];
+  // @OneToMany(() => TicketAssignment, (assignment) => assignment.admin)
+  // ticketAssignments: TicketAssignment[];
 
-//   @OneToMany(() => AdminDepartment, (adminDept) => adminDept.admin)
-//   departments: AdminDepartment[];
+  // @OneToMany(() => AdminDepartment, (adminDept) => adminDept.admin)
+  // departments: AdminDepartment[];
 
-//   @OneToMany(() => AdminTicket, (ticket) => ticket.sender)
-//   sentAdminTickets: AdminTicket[];
+  // @OneToMany(() => AdminTicket, (ticket) => ticket.sender)
+  // sentAdminTickets: AdminTicket[];
 
-//   @OneToMany(() => AdminTicket, (ticket) => ticket.receiver)
-//   receivedAdminTickets: AdminTicket[];
+  // @OneToMany(() => AdminTicket, (ticket) => ticket.receiver)
+  // receivedAdminTickets: AdminTicket[];
 }

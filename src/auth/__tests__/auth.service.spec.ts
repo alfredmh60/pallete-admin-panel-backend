@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { AuthService } from '../auth.service';
-import { Admins } from '../../entities/admin.entity';
+import { Admins } from '../../entities/admins.entity';
 import { Role } from '../../entities/role.entity';
 import { EmailService } from 'src/email/email.service';
 
@@ -68,13 +68,13 @@ describe('AuthService', () => {
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
 
       const result = await service.login({
-        email: 'test@example.com',
-        password: 'password',
+        email: 'manager@example.com',
+        password: 'Manager@123456',
       });
 
       expect(result).toHaveProperty('token');
       expect(result).toHaveProperty('user');
-      expect(result.user.email).toBe('test@example.com');
+      expect(result.user.email).toBe('manager@example.com');
     });
   });
 });

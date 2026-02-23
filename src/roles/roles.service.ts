@@ -10,7 +10,7 @@ import { Repository, In, Not } from 'typeorm';
 import { Role } from '../entities/role.entity';
 import { Permission } from '../entities/permission.entity';
 import { RolePermission } from '../entities/role-permission.entity';
-import { Admins } from '../entities/admin.entity';
+import { Admins } from '../entities/admins.entity';
 
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';

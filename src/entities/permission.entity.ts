@@ -10,15 +10,15 @@ export class Permission {
   name: string;
 
   @Column({ nullable: true })
-  description: string;
+  category: string;
 
   @Column({ nullable: true })
-  category: string;
+  description: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
   // Relations
-  @OneToMany(() => RolePermission, (rolePermission) => rolePermission.permissionId)
+  @OneToMany(() => RolePermission, (rolePermission) => rolePermission.permission)
   rolePermissions: RolePermission[];
 }
