@@ -10,9 +10,11 @@ import {
 } from 'typeorm';
 import { Role } from './role.entity';
 // import { Log } from './log.entity';
-// import { TicketAssignment } from './ticket-assignment.entity';
-// import { AdminDepartment } from './admin-department.entity';
-// import { AdminTicket } from './admin-ticket.entity';
+ import { TicketAssignment } from './ticket-assignment.entity';
+ import { AdminDepartment } from './admin-department.entity';
+import { AdminTicket } from './admin-ticket.entity';
+
+
 
 @Entity('admins')
 export class Admins {
@@ -67,15 +69,15 @@ export class Admins {
   // @OneToMany(() => Log, (log) => log.admin)
   // logs: Log[];
 
-  // @OneToMany(() => TicketAssignment, (assignment) => assignment.admin)
-  // ticketAssignments: TicketAssignment[];
+  @OneToMany(() => TicketAssignment, (assignment) => assignment.admin)
+  ticketAssignments: TicketAssignment[];
 
-  // @OneToMany(() => AdminDepartment, (adminDept) => adminDept.admin)
-  // departments: AdminDepartment[];
+  @OneToMany(() => AdminDepartment, (adminDept) => adminDept.admin)
+  departments: AdminDepartment[];
 
-  // @OneToMany(() => AdminTicket, (ticket) => ticket.sender)
-  // sentAdminTickets: AdminTicket[];
+  @OneToMany(() => AdminTicket, (ticket) => ticket.sender)
+  sentAdminTickets: AdminTicket[];
 
-  // @OneToMany(() => AdminTicket, (ticket) => ticket.receiver)
-  // receivedAdminTickets: AdminTicket[];
+  @OneToMany(() => AdminTicket, (ticket) => ticket.receiver)
+  receivedAdminTickets: AdminTicket[];
 }

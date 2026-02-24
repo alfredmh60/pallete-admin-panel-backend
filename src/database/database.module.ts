@@ -7,13 +7,13 @@ import { ConfigService } from '@nestjs/config';
  import { RolePermission } from '../entities/role-permission.entity';
 // import { Log } from '../entities/log.entity';
 // import { DiscountPackage } from '../entities/discount-package.entity';
-// import { TicketDepartment } from '../entities/ticket-department.entity';
-// import { AdminDepartment } from '../entities/admin-department.entity';
-// import { Ticket } from '../entities/ticket.entity';
-// import { TicketMessage } from '../entities/ticket-message.entity';
-// import { TicketAssignment } from '../entities/ticket-assignment.entity';
+ import { TicketDepartment } from '../entities/ticket-department.entity';
+ import { AdminDepartment } from '../entities/admin-department.entity';
+ import { Ticket } from '../entities/ticket.entity';
+ import { TicketMessage } from '../entities/ticket-message.entity';
+ import { TicketAssignment } from '../entities/ticket-assignment.entity';
 // import { FinancialRecord } from '../entities/financial-record.entity';
-// import { AdminTicket } from '../entities/admin-ticket.entity';
+ import { AdminTicket } from '../entities/admin-ticket.entity';
 
 @Module({
   imports: [
@@ -33,13 +33,13 @@ import { ConfigService } from '@nestjs/config';
            RolePermission,
           // Log,
           // DiscountPackage,
-          // TicketDepartment,
-          // AdminDepartment,
-          // Ticket,
-          // TicketMessage,
-          // TicketAssignment,
+           TicketDepartment,
+           AdminDepartment,
+           Ticket,
+           TicketMessage,
+           TicketAssignment,
           // FinancialRecord,
-          // AdminTicket,
+           AdminTicket,
         ],
         synchronize: configService.get('NODE_ENV') !== 'production', // فقط برای توسعه
         logging: configService.get('NODE_ENV') === 'development',

@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 
@@ -14,6 +14,8 @@ import { RequestResetDto } from './dto/request-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { Logger } from '@nestjs/common';
+import { BlacklistedToken } from '../entities/blacklisted-token.entity'; // یه entity جدید
+
 
 @Injectable()
 export class AuthService {
@@ -22,6 +24,8 @@ export class AuthService {
     private adminRepository: Repository<Admins>,
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
+    @InjectRepository(BlacklistedToken)
+    private blacklistRepository: Repository<BlacklistedToken>,
     private jwtService: JwtService,
     private emailService: EmailService,
   ) {}
@@ -82,6 +86,42 @@ const admin = await this.adminRepository.findOneBy({ email });
       },
     };
   }
+
+  async logout(token: string) {
+    // توکن رو به لیست سیاه اضافه کن
+    const expiresAt = this.getTokenExpiry(token);
+    
+    await this.blacklistRepository.save({
+      token,
+      expiresAt,
+    });
+
+    return { message: 'خروج با موفقیت انجام شد' };
+  }
+
+  async isTokenBlacklisted(token: string): Promise<boolean> {
+    const blacklisted = await this.blacklistRepository.findOne({
+      where: { token },
+    });
+    return !!blacklisted;
+  }
+
+  private getTokenExpiry(token: string): Date {
+    try {
+      const decoded = this.jwtService.decode(token) as any;
+      return new Date(decoded.exp * 1000);
+    } catch {
+      return new Date();
+    }
+  }
+
+  // پاک کردن توکن‌های منقضی شده (کرون جاب)
+  async cleanExpiredTokens() {
+    await this.blacklistRepository.delete({
+      expiresAt: LessThan(new Date()),
+    });
+  }
+
 
   async requestReset(requestResetDto: RequestResetDto) {
     const { email } = requestResetDto;

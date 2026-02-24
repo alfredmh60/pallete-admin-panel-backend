@@ -10,11 +10,12 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 
 import { Admins } from '../entities/admins.entity';
 import { Role } from '../entities/role.entity';
+import { BlacklistedToken } from 'src/entities/blacklisted-token.entity';
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    TypeOrmModule.forFeature([Admins, Role]),
+    TypeOrmModule.forFeature([Admins, Role,BlacklistedToken]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({

@@ -1,8 +1,10 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RequestResetDto } from './dto/request-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { BlacklistGuard } from 'src/common/guards/blacklist.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -13,7 +15,12 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
-
+ @Post('logout')
+  @UseGuards(JwtAuthGuard, BlacklistGuard)
+  async logout(@Req() req) {
+    const token = req.headers.authorization?.split(' ')[1];
+    return this.authService.logout(token);
+  }
   @Post('request-reset')
   @HttpCode(HttpStatus.OK)
   async requestReset(@Body() requestResetDto: RequestResetDto) {

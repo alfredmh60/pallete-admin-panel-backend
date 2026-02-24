@@ -102,12 +102,12 @@ export class EmailService {
 
   // ========== ایمیل‌های سیستمی ==========
 
-  async sendPasswordEmail(options: SendPasswordEmailOptions): Promise<boolean> {
+  async sendPasswordEmail(email: string, plainPassword: string, options: SendPasswordEmailOptions): Promise<boolean> {
     const { to, password, name } = options;
 
     const html = this.renderTemplate('welcome', { name, password }) || `
       <div dir="rtl" style="font-family: Vazir, Tahoma, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
-        <h2 style="color: #1976d2; text-align: center;">به پنل مدیریت خوش آمدید</h2>
+        <h2 style="color: #1976d2; text-align: center;">به پنل مدیریت پالت خوش آمدید</h2>
         <p>کاربر گرامی،</p>
         <p>حساب کاربری شما با موفقیت ایجاد شد. اطلاعات ورود شما به شرح زیر است:</p>
         <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
@@ -117,7 +117,7 @@ export class EmailService {
         <p>لطفاً پس از اولین ورود، رمز عبور خود را تغییر دهید.</p>
         <p style="color: #ff0000; font-size: 12px;">توجه: این ایمیل به صورت خودکار تولید شده است، لطفاً به آن پاسخ ندهید.</p>
         <hr style="border: 1px solid #e0e0e0;">
-        <p style="text-align: center; color: #666; font-size: 12px;">© 2024 پنل مدیریت. تمامی حقوق محفوظ است.</p>
+        <p style="text-align: center; color: #666; font-size: 12px;">© 2024 پنل مدیریت پالت. تمامی حقوق محفوظ است.</p>
       </div>
     `;
 

@@ -105,7 +105,12 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 reset database in dev
 
 npx typeorm schema:drop -d src/database/data-source.ts
+# تولید migration
+npm run migration:generate -- src/migrations/InitDatabase
+
+# اجرای migration
 npm run migration:run
+
 npm run seed
 npm run start:dev
 

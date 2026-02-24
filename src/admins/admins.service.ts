@@ -11,11 +11,11 @@ import { randomBytes } from 'crypto';
 
 import { Admins } from '../entities/admins.entity';
  import { Role } from '../entities/role.entity';
-// import { AdminDepartment } from '../entities/admin-department.entity';
-// import { EmailService } from '../email/email.service';
+ import { AdminDepartment } from '../entities/admin-department.entity';
+ import { EmailService } from '../email/email.service';
 
-// import { CreateAdminDto } from './dto/create-admin.dto';
-// import { UpdateAdminDto } from './dto/update-admin.dto';
+ import { CreateAdminDto } from './dto/create-admin.dto';
+ import { UpdateAdminDto } from './dto/update-admin.dto';
 import { IAdminWithRole } from './interfaces/admin.interface';
 
 @Injectable()
@@ -23,11 +23,11 @@ export class AdminsService {
   constructor(
     @InjectRepository(Admins)
     private adminRepository: Repository<Admins>,
-    // @InjectRepository(Role)
-    // private roleRepository: Repository<Role>,
-    // @InjectRepository(AdminDepartment)
-    // private adminDepartmentRepository: Repository<AdminDepartment>,
-    // private emailService: EmailService,
+     @InjectRepository(Role)
+     private roleRepository: Repository<Role>,
+     @InjectRepository(AdminDepartment)
+     private adminDepartmentRepository: Repository<AdminDepartment>,
+     private emailService: EmailService,
   ) {}
 
   async findAll(query: any, user: any): Promise<{ data: IAdminWithRole[]; total: number }> {
@@ -120,179 +120,179 @@ export class AdminsService {
     };
   }
 
-  // async create(createAdminDto: CreateAdminDto, creatorId: number): Promise<IAdminWithRole> {
-  //   const { email, roleId, name } = createAdminDto;
+  async create(createAdminDto: CreateAdminDto, creatorId: number): Promise<IAdminWithRole> {
+    const { email, roleId, name } = createAdminDto;
 
-  //   // بررسی تکراری بودن ایمیل
-  //   const existing = await this.adminRepository.findOne({
-  //     where: { email },
-  //     withDeleted: true, // حتی اگه soft delete شده باشه
-  //   });
-  //   if (existing) {
-  //     throw new BadRequestException('این ایمیل قبلاً ثبت شده است');
-  //   }
+    // بررسی تکراری بودن ایمیل
+    const existing = await this.adminRepository.findOne({
+      where: { email },
+      withDeleted: true, // حتی اگه soft delete شده باشه
+    });
+    if (existing) {
+      throw new BadRequestException('این ایمیل قبلاً ثبت شده است');
+    }
 
-  //   // بررسی وجود نقش
-  //   const role = await this.roleRepository.findOne({
-  //     where: { id: roleId },
-  //   });
-  //   if (!role) {
-  //     throw new BadRequestException('نقفش انتخاب شده معتبر نیست');
-  //   }
+    // بررسی وجود نقش
+    const role = await this.roleRepository.findOne({
+      where: { id: roleId },
+    });
+    if (!role) {
+      throw new BadRequestException('نقفش انتخاب شده معتبر نیست');
+    }
 
-  //   // تولید رمز تصادفی
-  //   const plainPassword = randomBytes(8).toString('hex');
-  //   const passwordHash = await bcrypt.hash(plainPassword, 10);
+    // تولید رمز تصادفی
+    const plainPassword = randomBytes(8).toString('hex');
+    const passwordHash = await bcrypt.hash(plainPassword, 10);
 
-  //   // ایجاد ادمین جدید
-  //   const admin = this.adminRepository.create({
-  //     email,
-  //     name,
-  //     passwordHash,
-  //     roleId,
-  //     createdBy: creatorId,
-  //   });
+    // ایجاد ادمین جدید
+    const admin = this.adminRepository.create({
+      email,
+      name,
+      passwordHash,
+      roleId,
+      createdBy: creatorId,
+    });
 
-  //   const savedAdmin = await this.adminRepository.save(admin);
+    const savedAdmin = await this.adminRepository.save(admin);
+const emailOptions = {  to: email, name: name || email, password: plainPassword };
+    // ارسال ایمیل با رمز عبور
+     await this.emailService.sendPasswordEmail(email, plainPassword,emailOptions);
 
-  //   // ارسال ایمیل با رمز عبور
-  //   // await this.emailService.sendPasswordEmail(email, plainPassword);
-
-  //   // بازگشت اطلاعات (بدون رمز)
-  //   const { passwordHash: _, resetToken, resetTokenExpiry, ...result } = savedAdmin;
+    // بازگشت اطلاعات (بدون رمز)
+    const { passwordHash: _, resetToken, resetTokenExpiry, ...result } = savedAdmin;
     
-  //   return {
-  //     ...result,
-  //     roleName: role.name,
-  //   };
-  // }
+    return {
+      ...result,
+      roleName: role.name,
+    };
+  }
 
-  // async update(id: number, updateAdminDto: UpdateAdminDto, user: any): Promise<{ message: string }> {
-  //   const admin = await this.adminRepository.findOne({
-  //     where: { id },
-  //     relations: ['role'],
-  //   });
-  //   if (!admin) {
-  //     throw new NotFoundException('ادمین یافت نشد');
-  //   }
+  async update(id: number, updateAdminDto: UpdateAdminDto, user: any): Promise<{ message: string }> {
+    const admin = await this.adminRepository.findOne({
+      where: { id },
+      relations: ['role'],
+    });
+    if (!admin) {
+      throw new NotFoundException('ادمین یافت نشد');
+    }
 
-  //   // بررسی دسترسی سوپرادمین
-  //   if (user.role === 'super_admin' && admin.role?.name === 'manager') {
-  //     throw new ForbiddenException('شما نمی‌توانید مدیر را ویرایش کنید');
-  //   }
+    // بررسی دسترسی سوپرادمین
+    if (user.role === 'super_admin' && admin.role?.name === 'manager') {
+      throw new ForbiddenException('شما نمی‌توانید مدیر را ویرایش کنید');
+    }
 
-  //   const updateData: Partial<Admin> = {};
+    const updateData: Partial<Admins> = {};
 
-  //   // بروزرسانی نام
-  //   if (updateAdminDto.name !== undefined) {
-  //     updateData.name = updateAdminDto.name;
-  //   }
+    // بروزرسانی نام
+    if (updateAdminDto.name !== undefined) {
+      updateData.name = updateAdminDto.name;
+    }
 
-  //   // بروزرسانی ایمیل
-  //   if (updateAdminDto.email !== undefined && updateAdminDto.email !== admin.email) {
-  //     const existing = await this.adminRepository.findOne({
-  //       where: { email: updateAdminDto.email },
-  //     });
-  //     if (existing) {
-  //       throw new BadRequestException('این ایمیل قبلاً ثبت شده است');
-  //     }
-  //     updateData.email = updateAdminDto.email;
-  //   }
+    // بروزرسانی ایمیل
+    if (updateAdminDto.email !== undefined && updateAdminDto.email !== admin.email) {
+      const existing = await this.adminRepository.findOne({
+        where: { email: updateAdminDto.email },
+      });
+      if (existing) {
+        throw new BadRequestException('این ایمیل قبلاً ثبت شده است');
+      }
+      updateData.email = updateAdminDto.email;
+    }
 
-  //   // بروزرسانی نقش
-  //   if (updateAdminDto.roleId !== undefined && updateAdminDto.roleId !== admin.roleId) {
-  //     // بررسی محدودیت سوپرادمین
-  //     if (user.role === 'super_admin') {
-  //       const newRole = await this.roleRepository.findOne({
-  //         where: { id: updateAdminDto.roleId },
-  //       });
-  //       if (newRole?.name === 'manager') {
-  //         throw new ForbiddenException('شما نمی‌توانید نقش مدیر را اختصاص دهید');
-  //       }
-  //     }
-  //     updateData.roleId = updateAdminDto.roleId;
-  //   }
+    // بروزرسانی نقش
+    if (updateAdminDto.roleId !== undefined && updateAdminDto.roleId !== admin.roleId) {
+      // بررسی محدودیت سوپرادمین
+      if (user.role === 'super_admin') {
+        const newRole = await this.roleRepository.findOne({
+          where: { id: updateAdminDto.roleId },
+        });
+        if (newRole?.name === 'manager') {
+          throw new ForbiddenException('شما نمی‌توانید نقش مدیر را اختصاص دهید');
+        }
+      }
+      updateData.roleId = updateAdminDto.roleId;
+    }
 
-  //   // بروزرسانی آواتار
-  //   if (updateAdminDto.avatar !== undefined) {
-  //     updateData.avatar = updateAdminDto.avatar;
-  //   }
+    // بروزرسانی آواتار
+    if (updateAdminDto.avatar !== undefined) {
+      updateData.avatar = updateAdminDto.avatar;
+    }
 
-  //   // اعمال تغییرات
-  //   if (Object.keys(updateData).length > 0) {
-  //     await this.adminRepository.update(id, updateData);
-  //   }
+    // اعمال تغییرات
+    if (Object.keys(updateData).length > 0) {
+      await this.adminRepository.update(id, updateData);
+    }
 
-  //   return { message: 'اطلاعات ادمین با موفقیت بروزرسانی شد' };
-  // }
+    return { message: 'اطلاعات ادمین با موفقیت بروزرسانی شد' };
+  }
 
-  // async toggleActive(id: number, user: any): Promise<{ isActive: boolean }> {
-  //   const admin = await this.adminRepository.findOne({
-  //     where: { id },
-  //     relations: ['role'],
-  //   });
-  //   if (!admin) {
-  //     throw new NotFoundException('ادمین یافت نشد');
-  //   }
+  async toggleActive(id: number, user: any): Promise<{ isActive: boolean }> {
+    const admin = await this.adminRepository.findOne({
+      where: { id },
+      relations: ['role'],
+    });
+    if (!admin) {
+      throw new NotFoundException('ادمین یافت نشد');
+    }
 
-  //   // بررسی دسترسی سوپرادمین
-  //   if (user.role === 'super_admin' && admin.role?.name === 'manager') {
-  //     throw new ForbiddenException('شما نمی‌توانید وضعیت مدیر را تغییر دهید');
-  //   }
+    // بررسی دسترسی سوپرادمین
+    if (user.role === 'super_admin' && admin.role?.name === 'manager') {
+      throw new ForbiddenException('شما نمی‌توانید وضعیت مدیر را تغییر دهید');
+    }
 
-  //   const newStatus = !admin.isActive;
-  //   await this.adminRepository.update(id, { isActive: newStatus });
+    const newStatus = !admin.isActive;
+    await this.adminRepository.update(id, { isActive: newStatus });
 
-  //   return { isActive: newStatus };
-  // }
+    return { isActive: newStatus };
+  }
 
-  // async remove(id: number): Promise<{ message: string }> {
-  //   const admin = await this.adminRepository.findOne({
-  //     where: { id },
-  //   });
-  //   if (!admin) {
-  //     throw new NotFoundException('ادمین یافت نشد');
-  //   }
+  async remove(id: number): Promise<{ message: string }> {
+    const admin = await this.adminRepository.findOne({
+      where: { id },
+    });
+    if (!admin) {
+      throw new NotFoundException('ادمین یافت نشد');
+    }
 
-  //   // Soft delete
-  //   await this.adminRepository.update(id, {
-  //     deletedAt: new Date(),
-  //   });
+    // Soft delete
+    await this.adminRepository.update(id, {
+      deletedAt: new Date(),
+    });
 
-  //   return { message: 'ادمین با موفقیت حذف شد' };
-  // }
+    return { message: 'ادمین با موفقیت حذف شد' };
+  }
 
-  // ========== مدیریت دپارتمان‌های ادمین ==========
+  //========== مدیریت دپارتمان‌های ادمین ==========
 
-//   async getAdminDepartments(adminId: number): Promise<number[]> {
-//     const adminDepts = await this.adminDepartmentRepository.find({
-//       where: { adminId },
-//     });
-//     return adminDepts.map((ad) => ad.departmentId);
-//   }
+  async getAdminDepartments(adminId: number): Promise<number[]> {
+    const adminDepts = await this.adminDepartmentRepository.find({
+      where: { adminId },
+    });
+    return adminDepts.map((ad) => ad.departmentId);
+  }
 
-//   async assignDepartments(adminId: number, departmentIds: number[]): Promise<{ message: string }> {
-//     const admin = await this.adminRepository.findOne({
-//       where: { id: adminId },
-//     });
-//     if (!admin) {
-//       throw new NotFoundException('ادمین یافت نشد');
-//     }
+  async assignDepartments(adminId: number, departmentIds: number[]): Promise<{ message: string }> {
+    const admin = await this.adminRepository.findOne({
+      where: { id: adminId },
+    });
+    if (!admin) {
+      throw new NotFoundException('ادمین یافت نشد');
+    }
 
-//     // حذف دپارتمان‌های قبلی
-//     await this.adminDepartmentRepository.delete({ adminId });
+    // حذف دپارتمان‌های قبلی
+    await this.adminDepartmentRepository.delete({ adminId });
 
-//     // اضافه کردن دپارتمان‌های جدید
-//     if (departmentIds.length > 0) {
-//       const adminDepts = departmentIds.map((departmentId) =>
-//         this.adminDepartmentRepository.create({
-//           adminId,
-//           departmentId,
-//         }),
-//       );
-//       await this.adminDepartmentRepository.save(adminDepts);
-//     }
+    // اضافه کردن دپارتمان‌های جدید
+    if (departmentIds.length > 0) {
+      const adminDepts = departmentIds.map((departmentId) =>
+        this.adminDepartmentRepository.create({
+          adminId,
+          departmentId,
+        }),
+      );
+      await this.adminDepartmentRepository.save(adminDepts);
+    }
 
-//     return { message: 'دپارتمان‌ها با موفقیت به ادمین اختصاص یافتند' };
-//   }
+    return { message: 'دپارتمان‌ها با موفقیت به ادمین اختصاص یافتند' };
+  }
 }
