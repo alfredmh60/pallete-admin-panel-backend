@@ -39,21 +39,21 @@ export class AdminsService {
       .where('admins.deletedAt IS NULL');
 
     // محدودیت بر اساس نقش کاربر
-    // if (user.role === 'super_admin') {
-    //   const managerRole = await this.roleRepository.findOne({
-    //     where: { name: 'manager' },
-    //   });
-    //   if (managerRole) {
-    //     queryBuilder.andWhere('admin.roleId != :managerId', {
-    //       managerId: managerRole.id,
-    //     });
-    //   }
-    // }
+    if (user.role === 'super_admin') {
+      const managerRole = await this.roleRepository.findOne({
+        where: { name: 'manager' },
+      });
+      if (managerRole) {
+        queryBuilder.andWhere('admin.roleId != :managerId', {
+          managerId: managerRole.id,
+        });
+      }
+    }
 
-    // فیلتر بر اساس نقش
-    // if (roleId) {
-    //   queryBuilder.andWhere('admin.roleId = :roleId', { roleId });
-    // }
+   // فیلتر بر اساس نقش
+    if (roleId) {
+      queryBuilder.andWhere('admin.roleId = :roleId', { roleId });
+    }
 
     // فیلتر بر اساس وضعیت فعال
     if (is_active !== undefined) {

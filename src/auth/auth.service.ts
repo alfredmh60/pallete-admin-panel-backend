@@ -81,7 +81,7 @@ const admin = await this.adminRepository.findOneBy({ email });
         avatar: admin.avatar,
         role: admin.role?.name,
         roleId: admin.roleId,
-        roleName: admin.role?.name,
+        roleName: admin.roleName,
         isActive: admin.isActive,
         permissions,
       },
