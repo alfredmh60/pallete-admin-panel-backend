@@ -22,6 +22,10 @@ export class CreateAdminDto {
   roleId: number;
 
   @IsString()
+  @IsNotEmpty({ message: 'نام نقش نمی‌تواند خالی باشد' })
+  roleName: string;
+
+  @IsString()
   @IsOptional()
   avatar?: string;
 }

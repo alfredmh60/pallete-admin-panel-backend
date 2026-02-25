@@ -143,13 +143,14 @@ export class AdminsService {
     // تولید رمز تصادفی
     const plainPassword = randomBytes(8).toString('hex');
     const passwordHash = await bcrypt.hash(plainPassword, 10);
-
+const roleName = role.name;
     // ایجاد ادمین جدید
     const admin = this.adminRepository.create({
       email,
       name,
       passwordHash,
       roleId,
+      roleName,
       createdBy: creatorId,
     });
 

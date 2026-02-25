@@ -36,6 +36,10 @@ export class Admins {
   @Column({ name: 'role_id', nullable: true })
   roleId: number;
 
+ @Column({ name: 'role_name' , nullable: true})
+  roleName: string;
+
+
   @ManyToOne(() => Role, (role) => role.admins)
   @JoinColumn({ name: 'role_id' })
   role: Role;

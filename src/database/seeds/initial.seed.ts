@@ -162,6 +162,7 @@ const NOW =this.getCurrentTimestamp();
         passwordHash,
         name: 'مدیر سیستم',
         roleId: savedRoles[0].id, // manager
+        roleName: savedRoles[0].name,
         createdAt:NOW,
         updatedAt:NOW,
         isActive: true,
