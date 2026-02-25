@@ -10,12 +10,11 @@ import { AdminsModule } from './admins/admins.module';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 // import { DiscountsModule } from './discounts/discounts.module';
-// import { TicketsModule } from './tickets/tickets.module';
 // import { FinanceModule } from './finance/finance.module';
-// import { AdminTicketsModule } from './admin-tickets/admin-tickets.module';
-// import { LogsModule } from './logs/logs.module';
 import { EmailModule } from './email/email.module';
-
+import { TicketsModule } from './tickets/tickets.module';
+import { LogsModule } from './logs/logs.module';
+import { AdminTicketsModule } from './admin-tickets/admin-tickets.module';
 
 @Module({
   imports: [
@@ -29,17 +28,19 @@ import { EmailModule } from './email/email.module';
     DatabaseModule,
 
     // ماژول‌های کاربردی
-    EmailModule,      // سرویس ایمیل (Global)
-    
-    AdminsModule,     // مدیریت ادمین‌ها
-    RolesModule,      // مدیریت نقش‌ها
+    EmailModule, // سرویس ایمیل (Global)
+
+    AdminsModule, // مدیریت ادمین‌ها
+    RolesModule, // مدیریت نقش‌ها
     PermissionsModule, // مدیریت مجوزها
-   AuthModule,       // احراز هویت 
-   // // DiscountsModule,  // مدیریت تخفیف‌ها
-    // TicketsModule,    // مدیریت تیکت‌ها
+    AuthModule, // احراز هویت
+    TicketsModule, // مدیریت تیکت‌ها
+    LogsModule, // مدیریت لاگ‌ها
+    AdminTicketsModule, // تیکت‌های مدیریتی
+
+    // // DiscountsModule,  // مدیریت تخفیف‌ها
+
     // FinanceModule,    // مدیریت مالی
-    // AdminTicketsModule, // تیکت‌های مدیریتی
-    // LogsModule,       // مدیریت لاگ‌ها
   ],
   controllers: [],
   providers: [],

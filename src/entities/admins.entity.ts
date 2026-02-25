@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Role } from './role.entity';
-// import { Log } from './log.entity';
+ import { Log } from './log.entity';
  import { TicketAssignment } from './ticket-assignment.entity';
  import { AdminDepartment } from './admin-department.entity';
 import { AdminTicket } from './admin-ticket.entity';
@@ -65,9 +65,9 @@ export class Admins {
   @Column({ name: 'deleted_at', nullable: true, type: 'timestamp' })
   deletedAt: Date;
 
-  // Relations
-  // @OneToMany(() => Log, (log) => log.admin)
-  // logs: Log[];
+  Relations
+  @OneToMany(() => Log, (log) => log.admin)
+  logs: Log[];
 
   @OneToMany(() => TicketAssignment, (assignment) => assignment.admin)
   ticketAssignments: TicketAssignment[];

@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
  import { Role } from '../entities/role.entity';
  import { Permission } from '../entities/permission.entity';
  import { RolePermission } from '../entities/role-permission.entity';
-// import { Log } from '../entities/log.entity';
+ import { Log } from '../entities/log.entity';
 // import { DiscountPackage } from '../entities/discount-package.entity';
  import { TicketDepartment } from '../entities/ticket-department.entity';
  import { AdminDepartment } from '../entities/admin-department.entity';
@@ -31,7 +31,7 @@ import { ConfigService } from '@nestjs/config';
            Role,
            Permission,
            RolePermission,
-          // Log,
+          Log,
           // DiscountPackage,
            TicketDepartment,
            AdminDepartment,

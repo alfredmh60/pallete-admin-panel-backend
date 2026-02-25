@@ -14,7 +14,7 @@ export class TicketMessage {
   ticket: Ticket;
 
   @Column({ name: 'sender_type' })
-  senderType: string;
+  senderType: string;// 'admin' | 'customer';
 
   @Column({ name: 'sender_id' })
   senderId: string;
