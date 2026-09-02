@@ -49,6 +49,9 @@ const NOW =this.getCurrentTimestamp();
         
         // مدیریت تیکت‌ها
         { name: 'view_tickets', description: 'مشاهده تیکت‌ها', category: 'tickets' ,createdAt:NOW},
+        { name: 'manage_tickets', description: 'مدیریت تیکت‌ها و دپارتمان‌ها', category: 'tickets' ,createdAt:NOW},
+        { name: 'edit_ticket', description: 'ویرایش تیکت', category: 'tickets' ,createdAt:NOW},
+        { name: 'delete_ticket', description: 'حذف تیکت', category: 'tickets' ,createdAt:NOW},
         { name: 'reply_ticket', description: 'پاسخ به تیکت', category: 'tickets' ,createdAt:NOW},
         { name: 'close_ticket', description: 'بستن تیکت', category: 'tickets' ,createdAt:NOW},
         { name: 'assign_ticket', description: 'تخصیص تیکت', category: 'tickets' ,createdAt:NOW},
@@ -64,6 +67,7 @@ const NOW =this.getCurrentTimestamp();
         
         // لاگ‌ها
         { name: 'view_logs', description: 'مشاهده لاگ‌ها', category: 'logs' ,createdAt:NOW},
+        { name: 'manage_logs', description: 'مدیریت لاگ‌ها', category: 'logs' ,createdAt:NOW},
         { name: 'delete_logs', description: 'حذف لاگ‌ها', category: 'logs' ,createdAt:NOW},
       ];
 
@@ -106,9 +110,10 @@ const NOW =this.getCurrentTimestamp();
       // SUPER_ADMIN: مجوزهای مدیریتی
       const superAdminPerms = savedPermissions.filter(p => 
         ['view_admins', 'create_admin', 'edit_admin', 'toggle_admin', 
-         'manage_roles', 'view_logs', 'view_discounts', 'manage_discounts',
-         'view_tickets', 'reply_ticket', 'close_ticket', 'view_finance',
-         'manage_finance', 'send_admin_ticket', 'view_admin_tickets'
+         'manage_roles', 'view_logs', 'manage_logs', 'view_discounts', 'manage_discounts',
+         'view_tickets', 'manage_tickets', 'edit_ticket', 'delete_ticket',
+         'reply_ticket', 'close_ticket', 'assign_ticket',
+         'view_finance', 'manage_finance', 'send_admin_ticket', 'view_admin_tickets'
         ].includes(p.name)
       );
 
@@ -133,7 +138,8 @@ const NOW =this.getCurrentTimestamp();
 
       // ADMIN_SUPPORT: مجوزهای پشتیبانی
       const supportPerms = savedPermissions.filter(p => 
-        ['view_tickets', 'reply_ticket', 'close_ticket', 'view_admin_tickets'].includes(p.name)
+        ['view_tickets', 'manage_tickets', 'edit_ticket', 'delete_ticket',
+         'reply_ticket', 'close_ticket', 'assign_ticket', 'view_admin_tickets'].includes(p.name)
       );
 
       supportPerms.forEach(permission => {
