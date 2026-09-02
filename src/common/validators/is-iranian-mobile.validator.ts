@@ -13,7 +13,7 @@ export function IsIranianMobile(validationOptions?: ValidationOptions) {
           return typeof value === 'string' && isValidIranianMobile(value);
         },
         defaultMessage() {
-          return 'شماره موبایل معتبر نیست؛ شماره باید مانند 09123456789 باشد';
+          return 'شماره موبایل معتبر نیست؛ شماره باید مانند 09123456789 یا +989123456789 باشد';
         },
       },
     });
