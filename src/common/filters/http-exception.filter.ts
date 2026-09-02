@@ -25,11 +25,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const exceptionResponse =
       exception instanceof HttpException ? exception.getResponse() : null;
 
-    const message =
+    const rawMessage =
       typeof exceptionResponse === 'string'
         ? exceptionResponse
         : (exceptionResponse as { message?: string | string[] })?.message ||
-          (exception instanceof Error ? exception.message : 'Internal server error');
+          (exception instanceof Error ? exception.message : 'خطای داخلی سرور');
+
+    const message = Array.isArray(rawMessage) ? rawMessage.join(' — ') : rawMessage;
 
     if (status >= 500) {
       this.logger.error(
@@ -44,7 +46,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       error:
         exception instanceof HttpException
           ? (exceptionResponse as { error?: string })?.error || exception.name
-          : 'Internal Server Error',
+          : 'خطای داخلی سرور',
     });
   }
 }

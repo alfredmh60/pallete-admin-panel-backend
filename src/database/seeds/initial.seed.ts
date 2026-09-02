@@ -47,23 +47,23 @@ const NOW =this.getCurrentTimestamp();
         { name: 'view_discounts', description: 'مشاهده تخفیف‌ها', category: 'discounts' ,createdAt:NOW},
         { name: 'manage_discounts', description: 'مدیریت تخفیف‌ها', category: 'discounts' ,createdAt:NOW},
         
-        // مدیریت تیکت‌ها
-        { name: 'view_tickets', description: 'مشاهده تیکت‌ها', category: 'tickets' ,createdAt:NOW},
-        { name: 'manage_tickets', description: 'مدیریت تیکت‌ها و دپارتمان‌ها', category: 'tickets' ,createdAt:NOW},
-        { name: 'edit_ticket', description: 'ویرایش تیکت', category: 'tickets' ,createdAt:NOW},
-        { name: 'delete_ticket', description: 'حذف تیکت', category: 'tickets' ,createdAt:NOW},
-        { name: 'reply_ticket', description: 'پاسخ به تیکت', category: 'tickets' ,createdAt:NOW},
-        { name: 'close_ticket', description: 'بستن تیکت', category: 'tickets' ,createdAt:NOW},
-        { name: 'assign_ticket', description: 'تخصیص تیکت', category: 'tickets' ,createdAt:NOW},
+        // تیکت‌های فروشنده (مدیریت از طریق core backend)
+        { name: 'view_tickets', description: 'مشاهده تیکت‌های فروشندگان', category: 'tickets' ,createdAt:NOW},
+        { name: 'manage_tickets', description: 'مدیریت تیکت‌های فروشندگان', category: 'tickets' ,createdAt:NOW},
+        { name: 'edit_ticket', description: 'ویرایش تیکت فروشنده', category: 'tickets' ,createdAt:NOW},
+        { name: 'delete_ticket', description: 'حذف تیکت فروشنده', category: 'tickets' ,createdAt:NOW},
+        { name: 'reply_ticket', description: 'پاسخ به تیکت فروشنده', category: 'tickets' ,createdAt:NOW},
+        { name: 'close_ticket', description: 'بستن تیکت فروشنده', category: 'tickets' ,createdAt:NOW},
+        { name: 'assign_ticket', description: 'تخصیص تیکت فروشنده', category: 'tickets' ,createdAt:NOW},
         
         // مدیریت مالی
         { name: 'view_finance', description: 'مشاهده امور مالی', category: 'finance' ,createdAt:NOW},
         { name: 'manage_finance', description: 'مدیریت امور مالی', category: 'finance' ,createdAt:NOW},
         
-        // تیکت‌های مدیریتی
-        { name: 'view_admin_tickets', description: 'مشاهده تیکت‌های مدیریتی', category: 'adminTickets' ,createdAt:NOW},
-        { name: 'send_admin_ticket', description: 'ارسال تیکت مدیریتی', category: 'adminTickets' ,createdAt:NOW},
-        { name: 'close_admin_ticket', description: 'بستن تیکت مدیریتی', category: 'adminTickets' ,createdAt:NOW},
+        // چت کارکنان
+        { name: 'view_staff_chat', description: 'مشاهده چت کارکنان', category: 'staffChat' ,createdAt:NOW},
+        { name: 'send_staff_chat', description: 'ارسال پیام در چت کارکنان', category: 'staffChat' ,createdAt:NOW},
+        { name: 'manage_staff_conversations', description: 'ایجاد و مدیریت گفتگوهای گروهی', category: 'staffChat' ,createdAt:NOW},
         
         // لاگ‌ها
         { name: 'view_logs', description: 'مشاهده لاگ‌ها', category: 'logs' ,createdAt:NOW},
@@ -113,7 +113,7 @@ const NOW =this.getCurrentTimestamp();
          'manage_roles', 'view_logs', 'manage_logs', 'view_discounts', 'manage_discounts',
          'view_tickets', 'manage_tickets', 'edit_ticket', 'delete_ticket',
          'reply_ticket', 'close_ticket', 'assign_ticket',
-         'view_finance', 'manage_finance', 'send_admin_ticket', 'view_admin_tickets'
+         'view_finance', 'manage_finance', 'view_staff_chat', 'send_staff_chat'
         ].includes(p.name)
       );
 
@@ -139,7 +139,7 @@ const NOW =this.getCurrentTimestamp();
       // ADMIN_SUPPORT: مجوزهای پشتیبانی
       const supportPerms = savedPermissions.filter(p => 
         ['view_tickets', 'manage_tickets', 'edit_ticket', 'delete_ticket',
-         'reply_ticket', 'close_ticket', 'assign_ticket', 'view_admin_tickets'].includes(p.name)
+         'reply_ticket', 'close_ticket', 'assign_ticket', 'view_staff_chat', 'send_staff_chat'].includes(p.name)
       );
 
       supportPerms.forEach(permission => {

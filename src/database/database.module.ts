@@ -1,19 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
- import { Admins } from '../entities/admins.entity';
- import { Role } from '../entities/role.entity';
- import { Permission } from '../entities/permission.entity';
- import { RolePermission } from '../entities/role-permission.entity';
- import { Log } from '../entities/log.entity';
-// import { DiscountPackage } from '../entities/discount-package.entity';
- import { TicketDepartment } from '../entities/ticket-department.entity';
- import { AdminDepartment } from '../entities/admin-department.entity';
- import { Ticket } from '../entities/ticket.entity';
- import { TicketMessage } from '../entities/ticket-message.entity';
- import { TicketAssignment } from '../entities/ticket-assignment.entity';
-// import { FinancialRecord } from '../entities/financial-record.entity';
- import { AdminTicket } from '../entities/admin-ticket.entity';
+import { Admins } from '../entities/admins.entity';
+import { Role } from '../entities/role.entity';
+import { Permission } from '../entities/permission.entity';
+import { RolePermission } from '../entities/role-permission.entity';
+import { Log } from '../entities/log.entity';
+import { StaffConversation } from '../entities/staff-conversation.entity';
+import { StaffConversationMember } from '../entities/staff-conversation-member.entity';
+import { StaffMessage } from '../entities/staff-message.entity';
+import { BlacklistedToken } from '../entities/blacklisted-token.entity';
 
 @Module({
   imports: [
@@ -27,21 +23,17 @@ import { ConfigService } from '@nestjs/config';
         password: configService.get('DB_PASSWORD', '123456789'),
         database: configService.get('DB_DATABASE', 'palette_ap_db'),
         entities: [
-           Admins,
-           Role,
-           Permission,
-           RolePermission,
+          Admins,
+          Role,
+          Permission,
+          RolePermission,
           Log,
-          // DiscountPackage,
-           TicketDepartment,
-           AdminDepartment,
-           Ticket,
-           TicketMessage,
-           TicketAssignment,
-          // FinancialRecord,
-           AdminTicket,
+          StaffConversation,
+          StaffConversationMember,
+          StaffMessage,
+          BlacklistedToken,
         ],
-        synchronize: configService.get('NODE_ENV') !== 'production', // فقط برای توسعه
+        synchronize: configService.get('NODE_ENV') !== 'production',
         logging: configService.get('NODE_ENV') === 'development',
       }),
     }),

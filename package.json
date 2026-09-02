@@ -21,6 +21,7 @@
     "migration:run": "npm run typeorm -- -d src/database/data-source.ts migration:run",
     "migration:revert": "npm run typeorm -- -d src/database/data-source.ts migration:revert",
     "migration:show": "npm run typeorm -- -d src/database/data-source.ts migration:show",
+    "migration:baseline": "ts-node scripts/baseline-migrations.ts",
     "schema:sync": "npm run typeorm -- -d src/database/data-source.ts schema:sync",
     "schema:drop": "npm run typeorm -- -d src/database/data-source.ts schema:drop",
     "seed": "ts-node src/database/seeds/index.ts",

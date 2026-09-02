@@ -1,21 +1,25 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  NotFoundException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThan, Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 
 import { Admins } from '../entities/admins.entity';
 import { Role } from '../entities/role.entity';
-import { EmailService } from '../email/email.service';
-
-import { LoginDto } from './dto/login.dto';
-import { RequestResetDto } from './dto/request-reset.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { RequestOtpDto } from './dto/request-otp.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
-import { Logger } from '@nestjs/common';
-import { BlacklistedToken } from '../entities/blacklisted-token.entity'; // یه entity جدید
-
+import { BlacklistedToken } from '../entities/blacklisted-token.entity';
+import { OtpService } from './otp.service';
+import { KavenegarService } from '../sms/kavenegar.service';
+import { normalizeIranianMobile } from '../utils/iranian-phone.util';
 
 @Injectable()
 export class AuthService {
@@ -27,53 +31,100 @@ export class AuthService {
     @InjectRepository(BlacklistedToken)
     private blacklistRepository: Repository<BlacklistedToken>,
     private jwtService: JwtService,
-    private emailService: EmailService,
+    private otpService: OtpService,
+    private kavenegarService: KavenegarService,
   ) {}
 
-  async login(loginDto: LoginDto) {
-    const { email, password } = loginDto;
-  
+  async requestOtp(requestOtpDto: RequestOtpDto) {
+    const phone = normalizeIranianMobile(requestOtpDto.phone);
+    if (!phone) {
+      throw new BadRequestException('شماره موبایل معتبر نیست');
+    }
+
     const admin = await this.adminRepository.findOne({
-      where: { email },
+      where: { phone, isActive: true },
+    });
+
+    if (!admin) {
+      throw new NotFoundException('ادمینی با این شماره موبایل یافت نشد');
+    }
+
+    if (!this.otpService.canResend(admin.otpRequestedAt)) {
+      const retryAfter = this.otpService.resendCooldownSeconds(admin.otpRequestedAt);
+      throw new HttpException(
+        `لطفاً ${retryAfter} ثانیه دیگر دوباره تلاش کنید`,
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
+    const { code, expiresAt } = this.otpService.generateOtp();
+    const now = new Date();
+
+    await this.adminRepository.update(admin.id, {
+      otpCode: code,
+      otpExpiresAt: expiresAt,
+      otpRequestedAt: now,
+    });
+
+    await this.kavenegarService.sendOtp(phone, code);
+
+    return {
+      message: 'کد تأیید ارسال شد',
+      expiresInSeconds: Math.floor((expiresAt.getTime() - now.getTime()) / 1000),
+      retryAfterSeconds: 60,
+    };
+  }
+
+  async verifyOtp(verifyOtpDto: VerifyOtpDto) {
+    const phone = normalizeIranianMobile(verifyOtpDto.phone);
+    if (!phone) {
+      throw new BadRequestException('شماره موبایل معتبر نیست');
+    }
+
+    const admin = await this.adminRepository.findOne({
+      where: { phone, isActive: true },
       relations: ['role', 'role.rolePermissions', 'role.rolePermissions.permission'],
     });
 
-    // بررسی وجود کاربر و صحت رمز
-    if (!admin || !admin.isActive) {
-      throw new UnauthorizedException('ایمیل یا رمز عبور اشتباه است');
+    if (!admin || !admin.otpCode) {
+      throw new UnauthorizedException('کد تأیید نامعتبر است');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, admin.passwordHash);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('ایمیل یا رمز عبور اشتباه است');
+    if (this.otpService.isExpired(admin.otpExpiresAt)) {
+      throw new BadRequestException('کد تأیید منقضی شده است؛ دوباره درخواست دهید');
     }
 
-    // گرفتن مجوزها از نقش
-    const permissions = admin.role?.rolePermissions?.map(
-      rp => rp.permission.name
-    ) || [];
+    if (!this.otpService.isCorrect(verifyOtpDto.otp, admin.otpCode)) {
+      throw new UnauthorizedException('کد تأیید نامعتبر است');
+    }
 
-    // ایجاد payload برای JWT
+    await this.adminRepository.update(admin.id, {
+      otpCode: null,
+      otpExpiresAt: null,
+    });
+
+    return this.buildAuthResponse(admin);
+  }
+
+  private buildAuthResponse(admin: Admins) {
+    const permissions =
+      admin.role?.rolePermissions?.map((rp) => rp.permission.name) || [];
+
     const payload: JwtPayload = {
       sub: admin.id,
       roleId: admin.roleId,
       role: admin.role?.name,
     };
 
-    // تولید توکن
     const token = this.jwtService.sign(payload);
-    
-    // تولید refresh token (اختیاری)
     const refreshToken = randomBytes(40).toString('hex');
-
-    // ذخیره refresh token در دیتابیس (اختیاری)
-   //  await this.adminRepository.update(admin.id, { refreshToken });
 
     return {
       token,
       refresh_token: refreshToken,
       user: {
         id: admin.id,
+        phone: admin.phone,
         email: admin.email,
         name: admin.name,
         avatar: admin.avatar,
@@ -87,9 +138,8 @@ export class AuthService {
   }
 
   async logout(token: string) {
-    // توکن رو به لیست سیاه اضافه کن
     const expiresAt = this.getTokenExpiry(token);
-    
+
     await this.blacklistRepository.save({
       token,
       expiresAt,
@@ -107,93 +157,34 @@ export class AuthService {
 
   private getTokenExpiry(token: string): Date {
     try {
-      const decoded = this.jwtService.decode(token) as any;
+      const decoded = this.jwtService.decode(token) as { exp: number };
       return new Date(decoded.exp * 1000);
     } catch {
       return new Date();
     }
   }
 
-  // پاک کردن توکن‌های منقضی شده (کرون جاب)
   async cleanExpiredTokens() {
     await this.blacklistRepository.delete({
       expiresAt: LessThan(new Date()),
     });
   }
 
-
-  async requestReset(requestResetDto: RequestResetDto) {
-    const { email } = requestResetDto;
-
-    const admin = await this.adminRepository.findOne({ 
-      where: { email } 
-    });
-
-    if (admin) {
-      // تولید توکن یکبار مصرف
-      const resetToken = randomBytes(32).toString('hex');
-      const expiry = new Date();
-      expiry.setHours(expiry.getHours() + 1); // 1 ساعت اعتبار
-
-      // ذخیره توکن در دیتابیس
-      await this.adminRepository.update(admin.id, {
-        resetToken,
-        resetTokenExpiry: expiry,
-      });
-
-      // ارسال ایمیل
-      const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-      await this.emailService.sendResetEmail({ to: admin.email,resetLink: resetLink });
-    }
-
-    // همیشه همین پیام رو برمی‌گردونیم (حتی اگه ایمیل وجود نداشته باشه)
-    return { 
-      message: 'اگر ایمیل شما در سیستم ثبت شده باشد، لینک بازیابی برای شما ارسال خواهد شد' 
-    };
-  }
-
-  async resetPassword(resetPasswordDto: ResetPasswordDto) {
-    const { token, newPassword } = resetPasswordDto;
-
-    const admin = await this.adminRepository.findOne({
-      where: { resetToken: token },
-    });
-
-    if (!admin || !admin.resetTokenExpiry || admin.resetTokenExpiry < new Date()) {
-      throw new BadRequestException('توکن نامعتبر یا منقضی شده است');
-    }
-
-    // هش کردن رمز جدید
-    const passwordHash = await bcrypt.hash(newPassword, 10);
-
-    // بروزرسانی رمز و پاک کردن توکن
-    await this.adminRepository.update(admin.id, {
-      passwordHash,
-      resetToken: "",
-      resetTokenExpiry: "",
-    });
-
-    return { message: 'رمز عبور با موفقیت تغییر کرد' };
-  }
-
   async refreshToken(refreshToken: string) {
-    // پیدا کردن کاربر با refresh token
     const admin = await this.adminRepository.findOne({
-      where: ({refreshToken }as any),
+      where: { refreshToken } as any,
     });
 
     if (!admin || !admin.isActive) {
       throw new UnauthorizedException('توکن نامعتبر است');
     }
 
-    // ایجاد payload جدید
     const payload: JwtPayload = {
       sub: admin.id,
       roleId: admin.roleId,
       role: admin.role?.name,
     };
 
-    // تولید توکن جدید
     const token = this.jwtService.sign(payload);
 
     return { token };
@@ -202,7 +193,7 @@ export class AuthService {
   async validateUser(payload: JwtPayload): Promise<Admins> {
     const admin = await this.adminRepository.findOne({
       where: { id: payload.sub, isActive: true },
-       relations: ['role'],
+      relations: ['role'],
     });
 
     if (!admin) {

@@ -1,17 +1,21 @@
 import { config } from 'dotenv';
-import * as bcrypt from 'bcrypt';
 import dataSource from '../src/database/data-source';
 import { InitialSeed } from '../src/database/seeds/initial.seed';
 import { Admins } from '../src/entities/admins.entity';
 import { Role } from '../src/entities/role.entity';
+import { normalizeIranianMobile } from '../src/utils/iranian-phone.util';
 
 config();
 
+const phone = normalizeIranianMobile(process.env.ADMIN_PHONE || '09127840027');
 const email = process.env.ADMIN_EMAIL || 'adminpalette@palette.local';
-const password = process.env.ADMIN_PASSWORD || 'adPalette.404';
 const name = process.env.ADMIN_NAME || 'Admin Palette';
 
 async function main() {
+  if (!phone) {
+    throw new Error('ADMIN_PHONE must be a valid Iranian mobile number (e.g. 09120000000)');
+  }
+
   await dataSource.initialize();
 
   const roleCount = await dataSource.getRepository(Role).count();
@@ -29,12 +33,16 @@ async function main() {
   }
 
   const adminRepository = dataSource.getRepository(Admins);
-  const passwordHash = await bcrypt.hash(password, 10);
 
-  let admin = await adminRepository.findOne({ where: { email } });
+  let admin = await adminRepository.findOne({ where: { phone } });
+
+  if (!admin && email) {
+    admin = await adminRepository.findOne({ where: { email } });
+  }
 
   if (admin) {
-    admin.passwordHash = passwordHash;
+    admin.phone = phone;
+    admin.email = email;
     admin.isActive = true;
     admin.roleId = managerRole.id;
     admin.roleName = managerRole.name;
@@ -43,8 +51,8 @@ async function main() {
     console.log('Updated existing admin.');
   } else {
     admin = adminRepository.create({
+      phone,
       email,
-      passwordHash,
       name,
       roleId: managerRole.id,
       roleName: managerRole.name,
@@ -55,9 +63,11 @@ async function main() {
   }
 
   console.log('');
-  console.log('Login credentials:');
-  console.log(`  Email:    ${email}`);
-  console.log(`  Password: ${password}`);
+  console.log('Login with OTP:');
+  console.log(`  Phone: ${phone}`);
+  if (email) {
+    console.log(`  Email: ${email} (optional)`);
+  }
 
   await dataSource.destroy();
 }

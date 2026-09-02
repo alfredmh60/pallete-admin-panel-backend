@@ -81,21 +81,4 @@ export class AdminsController {
     return this.adminsService.remove(+id);
   }
 
- // مسیرهای مدیریت دپارتمان‌های ادمین (اختیاری)
-  @Get(':id/departments')
-  @Roles('manager', 'super_admin')
-  @Permissions('edit_admin')
-  async getAdminDepartments(@Param('id') id: string) {
-    return this.adminsService.getAdminDepartments(+id);
-  }
-
-  @Post(':id/departments')
-  @Roles('manager', 'super_admin')
-  @Permissions('edit_admin')
-  async assignDepartments(
-    @Param('id') id: string,
-    @Body('departmentIds') departmentIds: number[],
-  ) {
-    return this.adminsService.assignDepartments(+id, departmentIds);
-  }
 }

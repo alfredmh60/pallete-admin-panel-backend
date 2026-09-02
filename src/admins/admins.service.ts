@@ -6,28 +6,20 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull, Not, In } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { randomBytes } from 'crypto';
-
 import { Admins } from '../entities/admins.entity';
- import { Role } from '../entities/role.entity';
- import { AdminDepartment } from '../entities/admin-department.entity';
- import { EmailService } from '../email/email.service';
-
- import { CreateAdminDto } from './dto/create-admin.dto';
- import { UpdateAdminDto } from './dto/update-admin.dto';
+import { Role } from '../entities/role.entity';
+import { CreateAdminDto } from './dto/create-admin.dto';
+import { UpdateAdminDto } from './dto/update-admin.dto';
 import { IAdminWithRole } from './interfaces/admin.interface';
+import { normalizeIranianMobile } from '../utils/iranian-phone.util';
 
 @Injectable()
 export class AdminsService {
   constructor(
     @InjectRepository(Admins)
     private adminRepository: Repository<Admins>,
-     @InjectRepository(Role)
-     private roleRepository: Repository<Role>,
-     @InjectRepository(AdminDepartment)
-     private adminDepartmentRepository: Repository<AdminDepartment>,
-     private emailService: EmailService,
+    @InjectRepository(Role)
+    private roleRepository: Repository<Role>,
   ) {}
 
   async findAll(query: any, user: any): Promise<{ data: IAdminWithRole[]; total: number }> {
@@ -62,10 +54,9 @@ export class AdminsService {
       });
     }
 
-    // جستجو در ایمیل یا نام
     if (search) {
       queryBuilder.andWhere(
-        '(admins.email ILIKE :search OR admins.name ILIKE :search)',
+        '(admins.email ILIKE :search OR admins.name ILIKE :search OR admins.phone ILIKE :search)',
         { search: `%${search}%` },
       );
     }
@@ -81,6 +72,7 @@ export class AdminsService {
     // تبدیل به فرمت خروجی (حذف فیلدهای حساس)
     const data = admins.map((admin) => ({
       id: admin.id,
+      phone: admin.phone,
       email: admin.email,
       name: admin.name,
       avatar: admin.avatar,
@@ -122,46 +114,51 @@ export class AdminsService {
 
   async create(createAdminDto: CreateAdminDto, creatorId: number): Promise<IAdminWithRole> {
     const { email, roleId, name } = createAdminDto;
+    const phone = normalizeIranianMobile(createAdminDto.phone);
 
-    // بررسی تکراری بودن ایمیل
-    const existing = await this.adminRepository.findOne({
-      where: { email },
-      withDeleted: true, // حتی اگه soft delete شده باشه
-    });
-    if (existing) {
-      throw new BadRequestException('این ایمیل قبلاً ثبت شده است');
+    if (!phone) {
+      throw new BadRequestException('شماره موبایل معتبر نیست');
     }
 
-    // بررسی وجود نقش
+    const existingPhone = await this.adminRepository.findOne({
+      where: { phone },
+      withDeleted: true,
+    });
+    if (existingPhone) {
+      throw new BadRequestException('این شماره موبایل قبلاً ثبت شده است');
+    }
+
+    if (email) {
+      const existingEmail = await this.adminRepository.findOne({
+        where: { email },
+        withDeleted: true,
+      });
+      if (existingEmail) {
+        throw new BadRequestException('این ایمیل قبلاً ثبت شده است');
+      }
+    }
+
     const role = await this.roleRepository.findOne({
       where: { id: roleId },
     });
     if (!role) {
-      throw new BadRequestException('نقفش انتخاب شده معتبر نیست');
+      throw new BadRequestException('نقش انتخاب شده معتبر نیست');
     }
 
-    // تولید رمز تصادفی
-    const plainPassword = randomBytes(8).toString('hex');
-    const passwordHash = await bcrypt.hash(plainPassword, 10);
-const roleName = role.name;
-    // ایجاد ادمین جدید
     const admin = this.adminRepository.create({
-      email,
+      phone,
+      email: email || null,
       name,
-      passwordHash,
       roleId,
-      roleName,
+      roleName: role.name,
       createdBy: creatorId,
     });
 
     const savedAdmin = await this.adminRepository.save(admin);
-const emailOptions = {  to: email, name: name || email, password: plainPassword };
-    // ارسال ایمیل با رمز عبور
-     await this.emailService.sendPasswordEmail(email, plainPassword,emailOptions);
 
-    // بازگشت اطلاعات (بدون رمز)
-    const { passwordHash: _, resetToken, resetTokenExpiry, ...result } = savedAdmin;
-    
+    const { passwordHash: _, resetToken, resetTokenExpiry, otpCode, otpExpiresAt, otpRequestedAt, ...result } =
+      savedAdmin;
+
     return {
       ...result,
       roleName: role.name,
@@ -189,15 +186,30 @@ const emailOptions = {  to: email, name: name || email, password: plainPassword 
       updateData.name = updateAdminDto.name;
     }
 
-    // بروزرسانی ایمیل
-    if (updateAdminDto.email !== undefined && updateAdminDto.email !== admin.email) {
-      const existing = await this.adminRepository.findOne({
-        where: { email: updateAdminDto.email },
-      });
-      if (existing) {
-        throw new BadRequestException('این ایمیل قبلاً ثبت شده است');
+    if (updateAdminDto.phone !== undefined && updateAdminDto.phone !== admin.phone) {
+      const phone = normalizeIranianMobile(updateAdminDto.phone);
+      if (!phone) {
+        throw new BadRequestException('شماره موبایل معتبر نیست');
       }
-      updateData.email = updateAdminDto.email;
+      const existing = await this.adminRepository.findOne({
+        where: { phone },
+      });
+      if (existing && existing.id !== id) {
+        throw new BadRequestException('این شماره موبایل قبلاً ثبت شده است');
+      }
+      updateData.phone = phone;
+    }
+
+    if (updateAdminDto.email !== undefined && updateAdminDto.email !== admin.email) {
+      if (updateAdminDto.email) {
+        const existing = await this.adminRepository.findOne({
+          where: { email: updateAdminDto.email },
+        });
+        if (existing && existing.id !== id) {
+          throw new BadRequestException('این ایمیل قبلاً ثبت شده است');
+        }
+      }
+      updateData.email = updateAdminDto.email || null;
     }
 
     // بروزرسانی نقش
@@ -263,37 +275,4 @@ const emailOptions = {  to: email, name: name || email, password: plainPassword 
     return { message: 'ادمین با موفقیت حذف شد' };
   }
 
-  //========== مدیریت دپارتمان‌های ادمین ==========
-
-  async getAdminDepartments(adminId: number): Promise<number[]> {
-    const adminDepts = await this.adminDepartmentRepository.find({
-      where: { adminId },
-    });
-    return adminDepts.map((ad) => ad.departmentId);
-  }
-
-  async assignDepartments(adminId: number, departmentIds: number[]): Promise<{ message: string }> {
-    const admin = await this.adminRepository.findOne({
-      where: { id: adminId },
-    });
-    if (!admin) {
-      throw new NotFoundException('ادمین یافت نشد');
-    }
-
-    // حذف دپارتمان‌های قبلی
-    await this.adminDepartmentRepository.delete({ adminId });
-
-    // اضافه کردن دپارتمان‌های جدید
-    if (departmentIds.length > 0) {
-      const adminDepts = departmentIds.map((departmentId) =>
-        this.adminDepartmentRepository.create({
-          adminId,
-          departmentId,
-        }),
-      );
-      await this.adminDepartmentRepository.save(adminDepts);
-    }
-
-    return { message: 'دپارتمان‌ها با موفقیت به ادمین اختصاص یافتند' };
-  }
 }

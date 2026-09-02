@@ -1,6 +1,7 @@
 export interface IAdmin {
   id: number;
-  email: string;
+  phone: string | null;
+  email: string | null;
   name: string | null;
   avatar: string | null;
   roleId: number | null;

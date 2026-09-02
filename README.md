@@ -126,13 +126,18 @@ npm run create-admin  # or create a custom admin user
 npm run start:dev
 ```
 
-Create admin:
+Create admin (default: phone `09127840027`, email `adminpalette@palette.local`):
 
 ```bash
-ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='YourPassword' npm run create-admin
+npm run create-admin
+# or override:
+ADMIN_PHONE=09127840027 ADMIN_EMAIL=adminpalette@palette.local npm run create-admin
 ```
 
+Login with OTP:
 
-curl -X POST http://localhost:9051/auth/login \
+```bash
+curl -X POST http://localhost:9051/auth/request-otp \
   -H "Content-Type: application/json" \
-  -d '{"email":"manager@example.com","password":"Manager@123456"}'
+  -d '{"phone":"09127840027"}'
+```

@@ -9,23 +9,24 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Role } from './role.entity';
- import { Log } from './log.entity';
- import { TicketAssignment } from './ticket-assignment.entity';
- import { AdminDepartment } from './admin-department.entity';
-import { AdminTicket } from './admin-ticket.entity';
-
-
+import { Log } from './log.entity';
+import { StaffConversation } from './staff-conversation.entity';
+import { StaffConversationMember } from './staff-conversation-member.entity';
+import { StaffMessage } from './staff-message.entity';
 
 @Entity('admins')
 export class Admins {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
-  email: string;
+  @Column({ type: 'varchar', unique: true, nullable: true })
+  email: string | null;
 
-  @Column({ name: 'password_hash' })
-  passwordHash: string;
+  @Column({ type: 'varchar', unique: true, nullable: true })
+  phone: string | null;
+
+  @Column({ name: 'password_hash', type: 'varchar', nullable: true })
+  passwordHash: string | null;
 
   @Column({ nullable: true })
   name: string;
@@ -36,9 +37,8 @@ export class Admins {
   @Column({ name: 'role_id', nullable: true })
   roleId: number;
 
- @Column({ name: 'role_name' , nullable: true})
+  @Column({ name: 'role_name', nullable: true })
   roleName: string;
-
 
   @ManyToOne(() => Role, (role) => role.admins)
   @JoinColumn({ name: 'role_id' })
@@ -46,6 +46,15 @@ export class Admins {
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
+
+  @Column({ name: 'otp_code', type: 'varchar', nullable: true })
+  otpCode: string | null;
+
+  @Column({ name: 'otp_expires_at', nullable: true, type: 'timestamp' })
+  otpExpiresAt: Date | null;
+
+  @Column({ name: 'otp_requested_at', nullable: true, type: 'timestamp' })
+  otpRequestedAt: Date | null;
 
   @Column({ name: 'reset_token', nullable: true })
   resetToken: string;
@@ -69,19 +78,15 @@ export class Admins {
   @Column({ name: 'deleted_at', nullable: true, type: 'timestamp' })
   deletedAt: Date;
 
-  Relations
   @OneToMany(() => Log, (log) => log.admin)
   logs: Log[];
 
-  @OneToMany(() => TicketAssignment, (assignment) => assignment.admin)
-  ticketAssignments: TicketAssignment[];
+  @OneToMany(() => StaffConversation, (conversation) => conversation.creator)
+  createdStaffConversations: StaffConversation[];
 
-  @OneToMany(() => AdminDepartment, (adminDept) => adminDept.admin)
-  departments: AdminDepartment[];
+  @OneToMany(() => StaffConversationMember, (member) => member.admin)
+  staffConversationMemberships: StaffConversationMember[];
 
-  @OneToMany(() => AdminTicket, (ticket) => ticket.sender)
-  sentAdminTickets: AdminTicket[];
-
-  @OneToMany(() => AdminTicket, (ticket) => ticket.receiver)
-  receivedAdminTickets: AdminTicket[];
+  @OneToMany(() => StaffMessage, (message) => message.sender)
+  staffMessages: StaffMessage[];
 }

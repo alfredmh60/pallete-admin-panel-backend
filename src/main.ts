@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { validationPipeOptions } from './common/pipes/validation-pipe.options';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -12,13 +13,7 @@ async function bootstrap() {
     const configService = app.get(ConfigService);
 
     // اعتبارسنجی سراسری
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true, // حذف فیلدهای اضافی
-        forbidNonWhitelisted: true, // خطا برای فیلدهای اضافی
-        transform: true, // تبدیل خودکار نوع‌ها
-      }),
-    );
+    app.useGlobalPipes(new ValidationPipe(validationPipeOptions));
     app.useGlobalFilters(new HttpExceptionFilter());
     // CORS
     app.enableCors({
