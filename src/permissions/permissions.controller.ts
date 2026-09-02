@@ -34,6 +34,20 @@ export class PermissionsController {
     return this.permissionsService.findAll(query);
   }
 
+  @Get('stats/usage')
+  @Roles('manager', 'super_admin')
+  @Permissions('view_logs')
+  async getPermissionUsageStats() {
+    return this.permissionsService.getPermissionUsageStats();
+  }
+
+  @Get('stats/unused')
+  @Roles('manager', 'super_admin')
+  @Permissions('view_logs')
+  async getUnusedPermissions() {
+    return this.permissionsService.getUnusedPermissions();
+  }
+
   @Get(':id')
   @Roles('manager', 'super_admin')
   @Permissions('manage_roles')
@@ -63,22 +77,6 @@ export class PermissionsController {
   @Permissions('manage_roles')
   async remove(@Param('id') id: string) {
     return this.permissionsService.remove(+id);
-  }
-
-  // ========== آمار و گزارشات ==========
-
-  @Get('stats/usage')
-  @Roles('manager', 'super_admin')
-  @Permissions('view_logs')
-  async getPermissionUsageStats() {
-    return this.permissionsService.getPermissionUsageStats();
-  }
-
-  @Get('stats/unused')
-  @Roles('manager', 'super_admin')
-  @Permissions('view_logs')
-  async getUnusedPermissions() {
-    return this.permissionsService.getUnusedPermissions();
   }
 
   // ========== دسته‌بندی مجوزها ==========

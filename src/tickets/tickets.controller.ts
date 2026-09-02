@@ -44,6 +44,11 @@ export class TicketsController {
     return this.ticketsService.getStats(user);
   }
 
+  @Get('departments/all')
+  async getAllDepartments() {
+    return this.ticketsService.getAllDepartments();
+  }
+
   @Get(':id')
   @Permissions('view_tickets')
   async findOne(@Param('id') id: string, @GetUser() user: any) {
@@ -133,13 +138,6 @@ export class TicketsController {
   @Permissions('view_tickets')
   async getMessages(@Param('id') id: string, @GetUser() user: any) {
     return this.ticketsService.getMessages(+id, user);
-  }
-
-  // ========== دپارتمان‌ها ==========
-
-  @Get('departments/all')
-  async getAllDepartments() {
-    return this.ticketsService.getAllDepartments();
   }
 
   @Post(':id/transfer')

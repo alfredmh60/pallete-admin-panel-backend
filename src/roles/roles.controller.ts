@@ -35,6 +35,13 @@ export class RolesController {
     return this.rolesService.findAll(query);
   }
 
+  @Get('stats/counts')
+  @RolesDecorator('manager', 'super_admin')
+  @Permissions('view_admins')
+  async getRoleStats() {
+    return this.rolesService.getRoleStats();
+  }
+
   @Get(':id')
   @RolesDecorator('manager', 'super_admin')
   @Permissions('manage_roles')
@@ -95,12 +102,4 @@ export class RolesController {
     return this.rolesService.removePermission(+id, +permissionId);
   }
 
-  // ========== آمار نقش‌ها ==========
-
-  @Get('stats/counts')
-  @RolesDecorator('manager', 'super_admin')
-  @Permissions('view_admins')
-  async getRoleStats() {
-    return this.rolesService.getRoleStats();
-  }
 }
