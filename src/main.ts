@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   try {
@@ -17,20 +19,7 @@ async function bootstrap() {
         transform: true, // تبدیل خودکار نوع‌ها
       }),
     );
-    app.useGlobalFilters(
-      new (class {
-        catch(exception: any, host: any) {
-          logger.error('global error:', exception);
-          const ctx = host.switchToHttp();
-          const response = ctx.getResponse();
-          response.status(500).json({
-            statusCode: 500,
-            message: exception.message || 'Internal server error',
-            error: exception.name,
-          });
-        }
-      })(),
-    );
+    app.useGlobalFilters(new HttpExceptionFilter());
     // CORS
     app.enableCors({
       origin: true,
@@ -41,7 +30,7 @@ async function bootstrap() {
     // پیش‌وند سراسری برای API (اختیاری)
     // app.setGlobalPrefix('api');
 
-    const port = configService.get('PORT') || 3000;
+    const port = configService.get('PORT') || 9051;
     await app.listen(port);
 
     logger.log(`🚀 Application is running on: http://localhost:${port}`);
