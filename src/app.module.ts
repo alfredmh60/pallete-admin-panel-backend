@@ -15,6 +15,7 @@ import { EmailModule } from './email/email.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { LogsModule } from './logs/logs.module';
 import { AdminTicketsModule } from './admin-tickets/admin-tickets.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { AdminTicketsModule } from './admin-tickets/admin-tickets.module';
     TicketsModule, // مدیریت تیکت‌ها
     LogsModule, // مدیریت لاگ‌ها
     AdminTicketsModule, // تیکت‌های مدیریتی
+    TasksModule,
 
     // // DiscountsModule,  // مدیریت تخفیف‌ها
 
