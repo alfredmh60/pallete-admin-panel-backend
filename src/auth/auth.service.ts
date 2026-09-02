@@ -33,12 +33,10 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
   
-   // پیدا کردن کاربر با ایمیل
-    // const admin = await this.adminRepository.findOne({
-    //   where: { email },
-    //   relations: ['role', 'role.rolePermissions', 'role.rolePermissions.permission'],
-    // });
-const admin = await this.adminRepository.findOneBy({ email });
+    const admin = await this.adminRepository.findOne({
+      where: { email },
+      relations: ['role', 'role.rolePermissions', 'role.rolePermissions.permission'],
+    });
 
     // بررسی وجود کاربر و صحت رمز
     if (!admin || !admin.isActive) {
