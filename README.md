@@ -114,7 +114,25 @@ npm run migration:run
 npm run seed
 npm run start:dev
 
+## Local development (Palette workspace)
 
-curl -X POST http://localhost:3000/auth/login \
+Default port: **9051**. Copy `.env.example` to `.env` and adjust values.
+
+```bash
+npm install
+npm run migration:run
+npm run seed          # optional: roles, permissions, manager@example.com
+npm run create-admin  # or create a custom admin user
+npm run start:dev
+```
+
+Create admin:
+
+```bash
+ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='YourPassword' npm run create-admin
+```
+
+
+curl -X POST http://localhost:9051/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"manager@example.com","password":"Manager@123456"}'
