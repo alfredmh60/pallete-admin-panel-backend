@@ -10,6 +10,10 @@ import { StaffConversation } from '../entities/staff-conversation.entity';
 import { StaffConversationMember } from '../entities/staff-conversation-member.entity';
 import { StaffMessage } from '../entities/staff-message.entity';
 import { BlacklistedToken } from '../entities/blacklisted-token.entity';
+import { Ticket } from '../entities/ticket.entity';
+import { TicketAnswer } from '../entities/ticket-answer.entity';
+import { TicketAssignment } from '../entities/ticket-assignment.entity';
+import { SellerTokenSession } from '../entities/seller-token-session.entity';
 
 @Module({
   imports: [
@@ -32,6 +36,10 @@ import { BlacklistedToken } from '../entities/blacklisted-token.entity';
           StaffConversationMember,
           StaffMessage,
           BlacklistedToken,
+          Ticket,
+          TicketAnswer,
+          TicketAssignment,
+          SellerTokenSession,
         ],
         synchronize: configService.get('NODE_ENV') !== 'production',
         logging: configService.get('NODE_ENV') === 'development',

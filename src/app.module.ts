@@ -11,6 +11,7 @@ import { EmailModule } from './email/email.module';
 import { LogsModule } from './logs/logs.module';
 import { StaffChatModule } from './staff-chat/staff-chat.module';
 import { TasksModule } from './tasks/tasks.module';
+import { TicketingModule } from './ticketing/ticketing.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { TasksModule } from './tasks/tasks.module';
     LogsModule,
     StaffChatModule,
     TasksModule,
+    TicketingModule,
   ],
   controllers: [],
   providers: [],
