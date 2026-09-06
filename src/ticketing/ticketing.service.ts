@@ -55,6 +55,7 @@ export class TicketingService {
           pageSize: safeSize,
           totalRecords: total,
         },
+        unreadCount: await this.countSellerUnread(seller.userId),
       },
       message: 'OK',
     };
@@ -67,8 +68,11 @@ export class TicketingService {
       order: { createdAt: 'ASC' },
     });
 
-    ticket.sellerLastSeenAt = new Date();
-    await this.ticketsRepo.save(ticket);
+    // Only advance read cursor when there is something new — avoids write-on-every-poll.
+    if (this.isUnreadForSeller(ticket)) {
+      ticket.sellerLastSeenAt = new Date();
+      await this.ticketsRepo.save(ticket);
+    }
 
     const publicAnswers = answers
       .filter((a) => a.side !== 'internal')
@@ -174,12 +178,7 @@ export class TicketingService {
   }
 
   async getSellerUnreadCount(seller: ValidatedSeller) {
-    const tickets = await this.ticketsRepo.find({
-      where: { userId: seller.userId },
-      select: ['id', 'lastMessageAt', 'lastMessageSide', 'sellerLastSeenAt'],
-    });
-
-    const unreadCount = tickets.filter((ticket) => this.isUnreadForSeller(ticket)).length;
+    const unreadCount = await this.countSellerUnread(seller.userId);
 
     return {
       success: true,
@@ -369,6 +368,18 @@ export class TicketingService {
 
   // ─── Helpers ────────────────────────────────────────────────────────────
 
+  private async countSellerUnread(userId: number): Promise<number> {
+    return this.ticketsRepo
+      .createQueryBuilder('ticket')
+      .where('ticket.user_id = :userId', { userId })
+      .andWhere("ticket.last_message_side = 'admin'")
+      .andWhere('ticket.last_message_at IS NOT NULL')
+      .andWhere(
+        '(ticket.seller_last_seen_at IS NULL OR ticket.last_message_at > ticket.seller_last_seen_at)',
+      )
+      .getCount();
+  }
+
   private async resolveAdmin(actor: StaffActor): Promise<Admins> {
     const admin = await this.adminsRepo.findOne({ where: { id: actor.id } });
     if (!admin) throw new BadRequestException('Admin not found');
@@ -382,26 +393,30 @@ export class TicketingService {
   }
 
   private async pickAutoAssignee(): Promise<Admins | null> {
-    const admins = await this.adminsRepo.find({
-      where: { isActive: true },
-      order: { id: 'ASC' },
-    });
-    if (admins.length === 0) return null;
+    const rows: Array<Admins & { open_count?: string | number }> =
+      await this.adminsRepo.manager.query(
+        `
+        SELECT a.*, COALESCE(c.open_count, 0)::int AS open_count
+        FROM admins a
+        LEFT JOIN (
+          SELECT assigned_admin_id, COUNT(*)::int AS open_count
+          FROM tickets
+          WHERE status = 'open' AND assigned_admin_id IS NOT NULL
+          GROUP BY assigned_admin_id
+        ) c ON c.assigned_admin_id = a.id
+        WHERE a.is_active = true AND a.deleted_at IS NULL
+        ORDER BY open_count ASC, a.id ASC
+        LIMIT 1
+        `,
+      );
 
-    let best: Admins | null = null;
-    let bestCount = Number.POSITIVE_INFINITY;
-
-    for (const admin of admins) {
-      const count = await this.ticketsRepo.count({
-        where: { assignedAdminId: admin.id, status: 'open' },
-      });
-      if (count < bestCount) {
-        best = admin;
-        bestCount = count;
-      }
-    }
-
-    return best;
+    if (!rows.length) return null;
+    const row = rows[0];
+    return {
+      id: row.id,
+      name: row.name,
+      isActive: row.is_active ?? row.isActive,
+    } as Admins;
   }
 
   private isUnreadForSeller(ticket: Pick<Ticket, 'lastMessageAt' | 'lastMessageSide' | 'sellerLastSeenAt'>) {

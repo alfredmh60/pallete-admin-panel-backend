@@ -59,8 +59,13 @@ export class SellerAuthService {
 
     const cached = await this.sessionsRepo.findOne({ where: { tokenHash } });
     if (cached && cached.expiresAt > now) {
-      cached.lastUsedAt = now;
-      await this.sessionsRepo.save(cached);
+      // Throttle lastUsedAt writes — sellers poll every few seconds.
+      const LAST_USED_THROTTLE_MS = 10 * 60 * 1000;
+      const lastUsed = cached.lastUsedAt?.getTime?.() ?? 0;
+      if (now.getTime() - lastUsed >= LAST_USED_THROTTLE_MS) {
+        cached.lastUsedAt = now;
+        await this.sessionsRepo.save(cached);
+      }
       return {
         userId: cached.userId,
         phone: cached.phone,
