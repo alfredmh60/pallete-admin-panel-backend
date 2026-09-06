@@ -23,9 +23,9 @@ async function bootstrap() {
     });
 
     // پیش‌وند سراسری برای API (اختیاری)
-    // app.setGlobalPrefix('api');
+     app.setGlobalPrefix('api-admin');
 
-    const port = configService.get('PORT') || 9051;
+    const port = configService.get('PORT') || 3006;
     await app.listen(port);
 
     logger.log(`🚀 Application is running on: http://localhost:${port}`);
