@@ -275,4 +275,11 @@ export class AdminsService {
     return { message: 'ادمین با موفقیت حذف شد' };
   }
 
+  async updateAvatar(id: number, avatarUrl: string): Promise<void> {
+    const admin = await this.adminRepository.findOne({ where: { id } });
+    if (!admin) {
+      throw new NotFoundException('ادمین یافت نشد');
+    }
+    await this.adminRepository.update(id, { avatar: avatarUrl });
+  }
 }

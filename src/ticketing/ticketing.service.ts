@@ -411,11 +411,11 @@ export class TicketingService {
       );
 
     if (!rows.length) return null;
-    const row = rows[0];
+    const row = rows[0] as Admins & { is_active?: boolean | number | string; open_count?: string | number };
     return {
       id: row.id,
       name: row.name,
-      isActive: row.is_active ?? row.isActive,
+      isActive: Boolean(row.is_active ?? row.isActive),
     } as Admins;
   }
 

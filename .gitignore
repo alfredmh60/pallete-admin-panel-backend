@@ -40,6 +40,14 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+.env.staging
+.env.production
+
+# GCS service-account keys — never commit
+credentials.json
+palette-cdn*.json
+*-credentials.json
+/secrets/
 
 # temp directory
 .temp

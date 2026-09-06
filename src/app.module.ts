@@ -12,6 +12,7 @@ import { LogsModule } from './logs/logs.module';
 import { StaffChatModule } from './staff-chat/staff-chat.module';
 import { TasksModule } from './tasks/tasks.module';
 import { TicketingModule } from './ticketing/ticketing.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { TicketingModule } from './ticketing/ticketing.module';
     }),
 
     DatabaseModule,
+    StorageModule,
 
     EmailModule,
 
